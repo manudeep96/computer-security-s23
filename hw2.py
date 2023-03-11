@@ -4,17 +4,19 @@ import time
 import os
 from cryptography.fernet import Fernet
 
+file_names = ['oneKb.txt', 'tenMb.txt']
 
-def genKey128():
+
+def gen_key(key_size):
     start_time = time.time()
-    key = os.urandom(16)
+    key = os.urandom(int(key_size/8))
     dur_keygen = time.time() - start_time
     return key, dur_keygen
  # Encryption
 
 
-def genIv128():
-    iv = os.urandom(16)
+def gen_iv():
+    iv = os.urandom(int(128/8))
     return iv
 
 
@@ -33,27 +35,40 @@ def decrypt_cbc(decryptor, ct):
     return pt, dur_dec_cbc
 
 
-def driver_a():
+def driver_a(mode, file_name, key_size):
+    # Which mode?
+    if mode == "CBC":
+        m = modes.CBC
+    elif mode == "CTR":
+        m = modes.CTR
+
     # Create key and IV
-    key128, dur_keygen_128 = genKey128()
-    print("time taken for key generation", dur_keygen_128)
-    iv = genIv128()
+    key, dur_keygen = gen_key(key_size)
+    print("time taken for {0}b key generation: {1}".format(
+        key_size, dur_keygen))
+
+    # IV is always block size of the Enc algorithm
+    iv = gen_iv()
     osslbackend = openssl.backend
 
     # Initialize necessary classes
-    cipher = Cipher(algorithms.AES(key128), modes.CBC(iv), osslbackend)
+    cipher = Cipher(algorithms.AES(key), m(iv), osslbackend)
     encryptor = cipher.encryptor()
     decryptor = cipher.decryptor()
-    with open('tenMb.txt', 'rb') as file:
+    with open(file_name, 'rb') as file:
         data = file.read()
 
     # Encryption
     ct, dur_enc_cbc = encrypt_cbc(encryptor, data)
-    print("Time take for encryption", dur_enc_cbc)
+    print("Time take for {0} encryption of file {1}: {2}".format(
+        mode, file_name, dur_enc_cbc))
 
     # Decryption
     pt, dur_dec_cbc = decrypt_cbc(decryptor, ct)
-    print("Time take for decryption", dur_dec_cbc)
+    print("Time take for {0} decryption of file {1}: {2}".format(
+        mode, file_name, dur_dec_cbc))
 
 
-driver_a()
+# mode, filename, key size
+driver_a('CBC', file_names[1], 256)
+# driver_a('CTR', file_names[1], 128)
