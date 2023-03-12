@@ -16,7 +16,7 @@ def gen_RSA_key(key_size):
     pk = sk.public_key()
     return sk, pk, dur_keygen
 
-    # Break data into chunks of 223bits(190 characters) and encrypt each seperately. Concatenate it to ct after each iteration
+# Break data into chunks of 223bits(190 characters) and encrypt each seperately. Concatenate it to ct after each iteration
 
 
 def break_data(data, size):

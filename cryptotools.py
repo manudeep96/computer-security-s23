@@ -93,7 +93,7 @@ def gen_RSA_key(key_size):
     start_time = time.time()
     sk = rsa.generate_private_key(
         public_exponent=65537, key_size=key_size, backend=osslbackend)
-    dur_keygen = time.time() - start_time
+    dur_keygen = (time.time() - start_time) * 1000000
     pk = sk.public_key()
     return sk, pk, dur_keygen
 
@@ -130,7 +130,7 @@ def encrypt_rsa(data, pk):
             )
         )
         ct.append(c)
-    dur_enc_rsa = time.time() - start_time
+    dur_enc_rsa = (time.time() - start_time) * 1000000
     return ct, dur_enc_rsa
 
 
@@ -146,7 +146,7 @@ def decrypt_rsa(ct, sk):
                 label=None
             )
         )
-    dur_dec_rsa = time.time() - start_time
+    dur_dec_rsa = (time.time() - start_time) * 1000000
     return pt, dur_dec_rsa
 
 
@@ -174,3 +174,43 @@ def driver_de(file_name, key_size=2048):
 print("\nPART d")
 driver_de(file_names[0], 2048)
 driver_de(file_names[1], 2048)
+
+
+# PART f
+hash_algorithms = ["SHA-256", "SHA-512", "SHA3-256"]
+
+
+def hash(data, digest):
+    start_time = time.time()
+    digest.update(data)
+    digest.finalize()
+    dur_hash = (time.time() - start_time) * 1000
+    return dur_hash, digest
+
+
+def driver(file, hash_algo):
+    fn = file
+    digest = None
+    if hash_algo == "SHA-256":
+        digest = hashes.Hash(hashes.SHA256(), backend=osslbackend)
+    elif hash_algo == "SHA-512":
+        digest = hashes.Hash(hashes.SHA512(), backend=osslbackend)
+    elif hash_algo == "SHA3-256":
+        digest = hashes.Hash(hashes.SHA3_256(), backend=osslbackend)
+
+    with open(file, 'rb') as file:
+        data = file.read()
+
+    dur_hash, _ = hash(data, digest)
+    print("Hashing- file: {0}, algo:{1}, time {2}".format(
+        fn, hash_algo, dur_hash))
+
+
+driver(file_names[0], hash_algorithms[0])
+driver(file_names[1], hash_algorithms[0])
+
+driver(file_names[0], hash_algorithms[1])
+driver(file_names[1], hash_algorithms[1])
+
+driver(file_names[0], hash_algorithms[2])
+driver(file_names[1], hash_algorithms[2])
