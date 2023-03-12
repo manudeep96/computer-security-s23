@@ -1,3 +1,10 @@
+https://crypto.stackexchange.com/questions/31632/what-is-the-difference-between-key-size-and-block-size-for-aes
 https://en.wikipedia.org/wiki/RSA_(cryptosystem)
 https://cryptography.io/en/latest/hazmat/primitives/asymmetric/rsa/
 https://stackoverflow.com/questions/449560/how-do-i-determine-the-size-of-an-object-in-python
+https://docs.python.org/3/library/timeit.html
+https://cryptography.io/en/latest/hazmat/primitives/asymmetric/dsa/
+https://onlinefiletools.com/generate-random-text-file
+https://en.wikipedia.org/wiki/RSA_(cryptosystem)
+https://convertlive.com/u/convert/kilobytes/to/bytes#1
+https://unix.stackexchange.com/questions/101332/generate-file-of-a-certain-size

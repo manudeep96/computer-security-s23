@@ -4,14 +4,17 @@ import time
 import os
 
 file_names = ['oneKb.txt', 'tenMb.txt']
+file_sizes = {"oneKb.txt": 1024, 'tenMb.txt': 1048576}
+
+# PARTS a,b,c
 
 
 def gen_key_aes(key_size):
     start_time = time.time()
     key = os.urandom(int(key_size/8))
-    dur_keygen = time.time() - start_time
+    dur_keygen = (time.time() - start_time) * 1000000
+
     return key, dur_keygen
- # Encryption
 
 
 def gen_iv():
@@ -23,14 +26,14 @@ def encrypt_aes(encryptor, data):
     start_time = time.time()
     ct = encryptor.update(data) + encryptor.finalize()
 
-    dur_enc_aes = time.time() - start_time
+    dur_enc_aes = (time.time() - start_time) * 1000000
     return ct, dur_enc_aes
 
 
 def decrypt_aes(decryptor, ct):
     start_time = time.time()
     pt = decryptor.update(ct) + decryptor.finalize()
-    dur_dec_aes = time.time() - start_time
+    dur_dec_aes = (time.time() - start_time) * 1000000
     return pt, dur_dec_aes
 
 
@@ -59,15 +62,23 @@ def driver_abc(mode, file_name, key_size):
 
     # Encryption
     ct, dur_enc_aes = encrypt_aes(encryptor, data)
-    print("Time take for {0} encryption of file {1}: {2}".format(
-        mode, file_name, dur_enc_aes))
+    print("Encryption - mode: {0} file: {1} duration: {2} time/byte: {3}".format(
+        mode, file_name, dur_enc_aes, dur_enc_aes/file_sizes[file_name]))
 
     # Decryption
-    pt, dur_dec_aes = decrypt_aes(decryptor, ct)
-    print("Time take for {0} decryption of file {1}: {2}".format(
-        mode, file_name, dur_dec_aes))
+    _, dur_dec_aes = decrypt_aes(decryptor, ct)
+    print("Decryption - mode: {0} file: {1} duration: {2} time/byte: {3}".format(
+        mode, file_name, dur_dec_aes, dur_dec_aes/file_sizes[file_name]))
 
 
-# mode, filename, key size
-driver_abc('CBC', file_names[1], 256)
-# driver_a('CTR', file_names[1], 128)
+print("\n PART a")
+driver_abc('CBC', file_names[0], 128)
+driver_abc('CBC', file_names[1], 128)
+
+print("\n PART b")
+driver_abc('CTR', file_names[0], 128)
+driver_abc('CTR', file_names[1], 128)
+
+print("\n PART c")
+driver_abc('CTR', file_names[0], 256)
+driver_abc('CTR', file_names[1], 256)
