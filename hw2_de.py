@@ -1,5 +1,3 @@
-from cryptography.hazmat.backends import openssl
-from cryptography.hazmat.primitives.ciphers import modes, Cipher, algorithms
 import cryptography
 import time
 import os
@@ -17,6 +15,8 @@ def gen_RSA_key(key_size):
     dur_keygen = time.time() - start_time
     pk = sk.public_key()
     return sk, pk, dur_keygen
+
+    # Break data into chunks of 223bits(190 characters) and encrypt each seperately. Concatenate it to ct after each iteration
 
 
 def break_data(data, size):
@@ -41,7 +41,6 @@ def encrypt_rsa(data, pk):
     data_chunks = break_data(data, 190)
     start_time = time.time()
     ct = []
-    # Break data into chunks of 223bits(190 characters) and encrypt each seperately. Concatenate it to ct after each iteration
     for d in data_chunks:
         c = pk.encrypt(
             d,
