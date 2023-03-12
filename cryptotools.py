@@ -5,14 +5,16 @@ import os
 
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from cryptography.hazmat.primitives import hashes
+
+from cryptography.hazmat.primitives.asymmetric import dsa
+
 osslbackend = openssl.backend
 
 file_names = ['oneKb.txt', 'tenMb.txt']
 file_sizes = {"oneKb.txt": 1024, 'tenMb.txt': 1048576}
 
+
 # PARTS a,b,c
-
-
 def gen_key_aes(key_size):
     start_time = time.time()
     key = os.urandom(int(key_size/8))
@@ -74,21 +76,20 @@ def driver_abc(mode, file_name, key_size):
         mode, file_name, dur_dec_aes, dur_dec_aes/file_sizes[file_name]))
 
 
-# print("\nPART a")
-# driver_abc('CBC', file_names[0], 128)
-# driver_abc('CBC', file_names[1], 128)
+print("\nPART a")
+driver_abc('CBC', file_names[0], 128)
+driver_abc('CBC', file_names[1], 128)
 
-# print("\nPART b")
-# driver_abc('CTR', file_names[0], 128)
-# driver_abc('CTR', file_names[1], 128)
+print("\nPART b")
+driver_abc('CTR', file_names[0], 128)
+driver_abc('CTR', file_names[1], 128)
 
-# print("\nPART c")
-# driver_abc('CTR', file_names[0], 256)
-# driver_abc('CTR', file_names[1], 256)
+print("\nPART c")
+driver_abc('CTR', file_names[0], 256)
+driver_abc('CTR', file_names[1], 256)
 
 
 # PART d,e
-
 def gen_RSA_key(key_size):
     start_time = time.time()
     sk = rsa.generate_private_key(
@@ -97,9 +98,8 @@ def gen_RSA_key(key_size):
     pk = sk.public_key()
     return sk, pk, dur_keygen
 
+
 # Break data into chunks of 223bits(190 characters) and encrypt each seperately. append it to ct after each iteration
-
-
 def break_data(data, size):
     i = size
     length = len(data)
@@ -174,6 +174,9 @@ def driver_de(file_name, key_size=2048):
 print("\nPART d")
 driver_de(file_names[0], 2048)
 driver_de(file_names[1], 2048)
+print("\nPART e")
+driver_de(file_names[0], 3072)
+driver_de(file_names[1], 3072)
 
 
 # PART f
@@ -202,10 +205,11 @@ def driver(file, hash_algo):
         data = file.read()
 
     dur_hash, _ = hash(data, digest)
-    print("Hashing- file: {0}, algo:{1}, time {2}".format(
-        fn, hash_algo, dur_hash))
+    print("Hashing- file: {0}, algo:{1}, time {2}, time/byte {3}".format(
+        fn, hash_algo, dur_hash, dur_hash/file_sizes[fn]))
 
 
+print("\nPART f")
 driver(file_names[0], hash_algorithms[0])
 driver(file_names[1], hash_algorithms[0])
 
@@ -214,3 +218,66 @@ driver(file_names[1], hash_algorithms[1])
 
 driver(file_names[0], hash_algorithms[2])
 driver(file_names[1], hash_algorithms[2])
+
+
+# PART g,h
+# Creates key - 2048 or 3072 bit
+def gen_dsa_key(size=2048):
+    start_time = time.time()
+    sk = dsa.generate_private_key(key_size=size, backend=osslbackend)
+    dur_keygen = (time.time() - start_time) * 1000000
+    pk = sk.public_key()
+    return sk, pk, dur_keygen
+
+
+def sign_files(sk, data):
+    start_time = time.time()
+    signature = sk.sign(
+        data,
+        hashes.SHA256()
+    )
+    dur_sign = (time.time() - start_time) * 1000000
+    return signature, dur_sign
+
+
+# Verifies signature
+def verify(pk, signature, data):
+    start_time = time.time()
+    pk.verify(
+        signature,
+        data,
+        hashes.SHA256()
+    )
+    dur_verify = (time.time() - start_time) * 1000000
+    return dur_verify
+
+
+def driver_gh(file_name, key_size):
+
+    sk, pk, dur_keygen = gen_dsa_key()
+    print("time taken for {0}b key generation: {1}".format(
+        key_size, dur_keygen))
+
+    # Open the file
+    with open(file_name, 'rb') as file:
+        data = file.read()
+
+    # Sign the file hash
+    signature, dur_sign = sign_files(sk, data)
+    print("Signing - file: {0} time: {1} time/ byte".format(file_name,
+          dur_sign, dur_sign/file_sizes[file_name]))
+
+    # Verify if the signature is valid with public key
+    dur_verify = verify(pk, signature, data)
+    print("Verifying - file: {0} time: {1} time/ byte".format(
+        file_name, dur_verify, dur_verify/file_sizes[file_name]))
+
+
+print("\nPart g")
+print("Key size - 2048 bits")
+driver_gh(file_names[0], 2048)
+driver_gh(file_names[1], 2048)
+print("\nPart h")
+print("Key size - 3072 bits")
+driver_gh(file_names[0], 3072)
+driver_gh(file_names[1], 3072)
