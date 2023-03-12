@@ -2,7 +2,6 @@ from cryptography.hazmat.backends import openssl
 from cryptography.hazmat.primitives.ciphers import modes, Cipher, algorithms
 import time
 import os
-from cryptography.fernet import Fernet
 
 file_names = ['oneKb.txt', 'tenMb.txt']
 
