@@ -35,7 +35,7 @@ def decrypt_cbc(decryptor, ct):
     return pt, dur_dec_cbc
 
 
-def driver_a(mode, file_name, key_size):
+def driver_abc(mode, file_name, key_size):
     # Which mode?
     if mode == "CBC":
         m = modes.CBC
@@ -70,5 +70,5 @@ def driver_a(mode, file_name, key_size):
 
 
 # mode, filename, key size
-driver_a('CBC', file_names[1], 256)
+driver_abc('CBC', file_names[1], 256)
 # driver_a('CTR', file_names[1], 128)

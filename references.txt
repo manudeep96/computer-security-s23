@@ -1,0 +1,3 @@
+https://en.wikipedia.org/wiki/RSA_(cryptosystem)
+https://cryptography.io/en/latest/hazmat/primitives/asymmetric/rsa/
+https://stackoverflow.com/questions/449560/how-do-i-determine-the-size-of-an-object-in-python
